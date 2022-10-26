@@ -1,6 +1,6 @@
 package com.andev.entity;
 
-import com.andev.entity.enumred.Status;
+import com.andev.entity.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

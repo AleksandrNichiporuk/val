@@ -1,10 +1,11 @@
 package com.andev.entity;
 
 import com.andev.IntegrationTestBase;
-import com.andev.entity.enumred.Status;
+import com.andev.entity.enums.Status;
 import com.andev.util.HibernateUtil;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -12,6 +13,8 @@ import java.time.LocalDate;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 
 class OrderIT extends IntegrationTestBase {
+
+    private static final SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
 
     @Test
     void whenSave_thenSaveCorrect() {
@@ -29,7 +32,7 @@ class OrderIT extends IntegrationTestBase {
         Integer givenId = 2;
         Order actual;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             session.save(given);
             actual = session.get(Order.class, givenId);
@@ -43,7 +46,7 @@ class OrderIT extends IntegrationTestBase {
     void whenSave_thenTrowException() {
 
         Throwable thrown = catchThrowable(() -> {
-            try (Session session = HibernateUtil.buildSession()) {
+            try (Session session = sessionFactory.openSession()) {
                 session.getTransaction().begin();
                 session.save(null);
                 session.getTransaction().commit();
@@ -59,7 +62,7 @@ class OrderIT extends IntegrationTestBase {
         Integer expectedId = 1;
         Order actual;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             actual = session.get(Order.class, givenId);
             session.getTransaction().commit();
@@ -73,7 +76,7 @@ class OrderIT extends IntegrationTestBase {
         Integer givenId = Integer.MAX_VALUE;
         Order actual;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             actual = session.get(Order.class, givenId);
             session.getTransaction().commit();
@@ -94,7 +97,7 @@ class OrderIT extends IntegrationTestBase {
         Status expectedStatus = Status.SENT;
         Order actual;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             session.update(given);
             session.flush();
@@ -114,7 +117,7 @@ class OrderIT extends IntegrationTestBase {
                 .build();
         Order actual;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             session.delete(given);
             session.flush();

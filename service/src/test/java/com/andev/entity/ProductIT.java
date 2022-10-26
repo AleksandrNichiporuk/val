@@ -4,6 +4,7 @@ import com.andev.IntegrationTestBase;
 import com.andev.util.HibernateUtil;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -12,17 +13,19 @@ import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 
 class ProductIT extends IntegrationTestBase {
 
+    private static final SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
+
     @Test
     void whenSave_thenSaveCorrect() {
         Product givenProduct = Product.builder()
-                .nameProduct("prod")
+                .name("prod")
                 .description("bla")
                 .amount(33)
                 .price(BigDecimal.ONE)
                 .build();
         Product expectedProduct = Product.builder()
                 .id(2)
-                .nameProduct("prod")
+                .name("prod")
                 .description("bla")
                 .amount(33)
                 .price(BigDecimal.ONE)
@@ -30,7 +33,7 @@ class ProductIT extends IntegrationTestBase {
         Integer givenId = 2;
         Product actualProduct;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             session.save(givenProduct);
             actualProduct = session.get(Product.class, givenId);
@@ -43,7 +46,7 @@ class ProductIT extends IntegrationTestBase {
     @Test
     void whenSave_thenTrowException() {
         Throwable thrown = catchThrowable(() -> {
-            try (Session session = HibernateUtil.buildSession()) {
+            try (Session session = sessionFactory.openSession()) {
                 session.getTransaction().begin();
                 session.save(null);
                 session.getTransaction().commit();
@@ -59,7 +62,7 @@ class ProductIT extends IntegrationTestBase {
         Integer expectedId = 1;
         Product actualProduct;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             actualProduct = session.get(Product.class, givenId);
             session.getTransaction().commit();
@@ -73,7 +76,7 @@ class ProductIT extends IntegrationTestBase {
         Integer givenId = Integer.MAX_VALUE;
         Product actualProduct;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             actualProduct = session.get(Product.class, givenId);
             session.getTransaction().commit();
@@ -87,12 +90,12 @@ class ProductIT extends IntegrationTestBase {
         Integer givenId = 1;
         Product givenProduct = Product.builder()
                 .id(1)
-                .nameProduct("new product")
+                .name("new product")
                 .build();
         String expectedNameProduct = "new product";
         Product actualProduct;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             session.update(givenProduct);
             session.flush();
@@ -101,7 +104,7 @@ class ProductIT extends IntegrationTestBase {
             session.getTransaction().commit();
         }
 
-        Assertions.assertThat(actualProduct.getNameProduct()).isEqualTo(expectedNameProduct);
+        Assertions.assertThat(actualProduct.getName()).isEqualTo(expectedNameProduct);
     }
 
     @Test
@@ -112,7 +115,7 @@ class ProductIT extends IntegrationTestBase {
                 .build();
         Product actualProduct;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             session.delete(givenProduct);
             session.flush();

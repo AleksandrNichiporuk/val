@@ -3,6 +3,7 @@ package com.andev;
 import com.andev.util.HibernateUtil;
 import lombok.SneakyThrows;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 
 public abstract class IntegrationTestBase {
@@ -12,7 +13,8 @@ public abstract class IntegrationTestBase {
             (
                 id         SERIAL PRIMARY KEY,
                 login      VARCHAR(128) NOT NULL UNIQUE ,
-                password   VARCHAR(128) NOT NULL
+                password   VARCHAR(128) NOT NULL,
+                role       VARCHAR (32) NOT NULL
             );
             """;
 
@@ -61,8 +63,8 @@ public abstract class IntegrationTestBase {
             """;
 
     private static final String INSERT_USER = """
-            INSERT INTO users (login, password)
-            VALUES ('ivan', '123')
+            INSERT INTO users (login, password, role)
+            VALUES ('ivan', '123', 'ADMIN')
             """;
 
     private static final String INSERT_USER_INFO = """
@@ -85,13 +87,14 @@ public abstract class IntegrationTestBase {
             VALUES ('product', 'text', 21, 100)
             """;
 
-
     private static final String CLEAN_SQL = "DROP TABLE IF EXISTS %s CASCADE;";
+
+    private static final SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
 
     @BeforeEach
     @SneakyThrows
     void prepareDatabase() {
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
 
             session.createSQLQuery(CLEAN_SQL.formatted("users")).executeUpdate();

@@ -4,11 +4,14 @@ import com.andev.IntegrationTestBase;
 import com.andev.util.HibernateUtil;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowable;
 
 class UserInfoIT extends IntegrationTestBase {
+
+    private static final SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
 
     @Test
     void whenSave_thenSaveCorrect() {
@@ -28,20 +31,21 @@ class UserInfoIT extends IntegrationTestBase {
         Integer givenId = 2;
         UserInfo actualUserInfo;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             session.save(givenUserInfo);
+            session.flush();
+            session.clear();
             actualUserInfo = session.get(UserInfo.class, givenId);
-            session.getTransaction().commit();
+            Assertions.assertThat(actualUserInfo).isEqualTo(expectedUserInfo);
+            session.getTransaction().rollback();
         }
-
-        Assertions.assertThat(actualUserInfo).isEqualTo(expectedUserInfo);
     }
 
     @Test
     void whenSave_thenTrowException() {
         Throwable thrown = catchThrowable(() -> {
-            try (Session session = HibernateUtil.buildSession()) {
+            try (Session session = sessionFactory.openSession()) {
                 session.getTransaction().begin();
                 session.save(null);
                 session.getTransaction().commit();
@@ -57,7 +61,7 @@ class UserInfoIT extends IntegrationTestBase {
         Integer expectedId = 1;
         UserInfo actualUserInfo;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             actualUserInfo = session.get(UserInfo.class, givenId);
             session.getTransaction().commit();
@@ -71,7 +75,7 @@ class UserInfoIT extends IntegrationTestBase {
         Integer givenId = Integer.MAX_VALUE;
         UserInfo actualUserInfo;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             actualUserInfo = session.get(UserInfo.class, givenId);
             session.getTransaction().commit();
@@ -93,7 +97,7 @@ class UserInfoIT extends IntegrationTestBase {
         String expectedLastName = "Petrov";
         UserInfo actualUserInfo;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             session.update(givenUserInfo);
             session.flush();
@@ -117,7 +121,7 @@ class UserInfoIT extends IntegrationTestBase {
                 .build();
         UserInfo actualUserInfo;
 
-        try (Session session = HibernateUtil.buildSession()) {
+        try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
             session.delete(givenUserInfo);
             session.flush();

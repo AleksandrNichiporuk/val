@@ -1,5 +1,6 @@
 package com.andev.entity;
 
+import com.andev.entity.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +21,6 @@ public class User {
     private Integer id;
     private String login;
     private String password;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }
